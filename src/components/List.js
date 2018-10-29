@@ -11,6 +11,7 @@ import {
   Picker,
   ImageBackground,
   StatusBar,
+  Image
 } from 'react-native';
 
 import {Actions} from 'react-native-router-flux';
@@ -20,53 +21,43 @@ export default class List extends Component {
     super(props);
     this.state = {
       cust_id: this.props.id,
-      customerData: [],
+      body: this.props.body,
+      comment:this.props.comments,
+      user:this.props.user,
+      image1:this.props.logo
     };
   }
 
  
 
   render() {
-     console.log(this.props.id);
+     console.log(this.props.user);
     return (
-     <View>
-        {this.props.title}
+     <View style={{flex:1,backgroundColor:'#00bcd4',alignItems:'center'}}>
+    
+       <Text style={{fontFamily:'bold',fontSize:20, color:'red'}}>Details</Text>
+     
+     <View style={{ flexDirection: 'row',marginTop:10}} >
+        <Image source = {{ uri: this.state.image1}} style={styles.imageView} />
+        <View style={{ flex:1}} >
+          <Text style={{fontFamily:'bold',fontSize:20,color:'#ffffff',}}> Name:{this.state.user}{'\n'}</Text>
+          <Text style={{fontFamily:'bold',fontSize:20,color:'#ffffff',}}>comments:{this.state.comment}</Text>
+        </View>
+      </View>
+        <Text style={{color:'#ffffff',fontSize:15,paddingHorizontal:10}}>{this.state.body}</Text>
+        
+     
      </View>
     );
   }
 }
 const styles = StyleSheet.create({
-  bar: {
-    color: '#ffffff',
-    fontSize: 25,
-  },
-  text: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  home: {
-    color: '#fff',
-    fontSize: 30,
-  },
-  button: {
-    backgroundColor: '#640405',
-    width: '30%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  image: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  textstyle: {
-    fontSize: 20,
-    color: '#ffffff',
+  imageView: {
+
+    width: '25%',
+    height: 70,
+    margin: 7,
+    borderRadius: 7
+
   },
 });

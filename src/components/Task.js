@@ -12,7 +12,8 @@ import { StyleSheet,
    FlatList,
     Text,
      Image, Alert, YellowBox,NetInfo,
-    TouchableOpacity } from 'react-native';
+    TouchableOpacity,
+  RefreshControl } from 'react-native';
  
 import {Router,Scene,Actions} from 'react-native-router-flux';
 export default class Task extends Component {
@@ -22,11 +23,10 @@ export default class Task extends Component {
    super(props);
  
    this.state = {
-      dataSource:[],
+     dataSource:[],
      isLoading: true,
-     connection_Status : ""
- 
-     
+     connection_Status : "",
+     refreshing: false,
  
    }
  
@@ -36,6 +36,8 @@ export default class Task extends Component {
   ]);
  
  }
+
+ 
  componentDidMount() {
  
     NetInfo.isConnected.addEventListener(
@@ -98,19 +100,20 @@ GetItem (body) {
    );
  }
  
+onRefresh = () => {
+    this.setState({refreshing: true});
+    fetchData().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
 
   componentWillMount () {
     this.fetchData ();
   }
 
   fetchData = () => {
-   
-
-    let url = 'https://api.github.com/repos/crashlytics/secureudid/issues';
-
-    
-
-    fetch (url, {
+       let url = 'https://api.github.com/repos/crashlytics/secureudid/issues';
+     fetch (url, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -135,30 +138,6 @@ GetItem (body) {
    
   };
 
-  onPress (list) {
-    console.log (list);
-    Actions.task (list);
-  }
-  renderItem (row) {
-    var list = row.item;
-   
-    return (
-      <TouchableOpacity onPress={event => Actions.list ()}>
-          <View style={{flex:1}}>
-            <View style={{flex:1, flexDirection: 'row'}} >
-              <Image source = {{ uri: item.user.avatar_url }} style={styles.imageView} />
-              <Text style={{fontSize:14,fontWeight:'bold',justifyContent:'center'}}>{item.title}</Text>
-           </View>
-           <View>
-             <Text style={{fontSize:12,paddingHorizontal:10}}>{item.body}</Text>
-           </View>  
-            
-            
-            </View>
-       </TouchableOpacity>
-    );
-  }
- 
  render() {
  
    if (this.state.isLoading) {
@@ -180,32 +159,31 @@ GetItem (body) {
      <Text style={{fontSize: 20, textAlign: 'center', marginBottom: 20}}> You are { this.state.connection_Status } </Text>
  
        <FlatList
-       
-        data={ this.state.dataSource }
+           data={ this.state.dataSource }
+           ItemSeparatorComponent = {this.FlatListItemSeparator}
+           renderItem={({item})=>
         
-        ItemSeparatorComponent = {this.FlatListItemSeparator}
-        renderItem={({item})=>
-        
-        <TouchableOpacity onPress={event => this.onPress.bind(this)}>
+        <TouchableOpacity onPress={()=> Actions.list ({id:item.id,
+                                                        body:item.body,
+                                                        comments:item.comments,
+                                                        user:item.user.login,
+                                                        logo: item.user.avatar_url})}>
           <View style={{flex:1}}>
             <View style={{flex:1, flexDirection: 'row'}} >
               <Image source = {{ uri: item.user.avatar_url }} style={styles.imageView} />
-              <Text style={{fontSize:14,fontWeight:'bold',justifyContent:'center'}}>{item.title}</Text>
+              <Text style={{fontSize:14,fontWeight:'bold',justifyContent:'center'}}> Title:{item.title}</Text>
            </View>
            <View style={{flex:1,flexDirection:'row'}}>
-             <Text style={{fontSize:12,paddingHorizontal:10}}>{item.body}</Text>
-             <Text style={{fontSize:12,paddingHorizontal:10}}>{item.created_at}</Text>
+             <Text numberOfLines={4} style={{fontSize:12,paddingHorizontal:10}}><Text style={{fontFamily:'bold'}}>Description:{'\n'}</Text>{item.body}</Text>
+             <Text style={{fontSize:12,paddingHorizontal:10}}>Date: {item.updated_at}</Text>
            </View>  
-            
-            
-            </View>
+           </View>
        </TouchableOpacity>
         }
-       
- 
         keyExtractor={(item, index) => index.toString()}
-        
-        />
+        refreshing={this.state.refreshing}
+        onRefresh={this.onRefresh}
+          />
  
        </View>
    );
